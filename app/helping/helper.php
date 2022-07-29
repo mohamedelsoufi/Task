@@ -10,3 +10,12 @@ function failureResponse($data = [])
 {
     return response()->json(['status' => 0, 'msg' => 'error', 'data' => $data], 400);
 }
+
+function getAuthAPIUser()
+{
+    $user = \auth('api')->user();
+    if (!$user)
+        return failureResponse('user not registered');
+    return $user;
+}
+

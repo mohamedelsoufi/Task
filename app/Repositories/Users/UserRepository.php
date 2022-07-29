@@ -6,6 +6,7 @@ namespace App\Repositories\Users;
 
 use App\Http\Resources\Users\GetUsersResource;
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\File;
 
@@ -21,8 +22,7 @@ class UserRepository implements UserRepositoryInterface
         } catch (\Exception $e) {
             return failureResponse($e->getMessage());
         }
-    }// get all users end
-
+    }//end of get all users
 
     // get user by ID start
     public function getUserById($request)
@@ -33,13 +33,13 @@ class UserRepository implements UserRepositoryInterface
         } catch (\Exception $e) {
             return failureResponse($e->getMessage());
         }
-    }// get user by ID end
+    }//end of get user by ID
 
     // show authenticated user profile
     public function authUser()
     {
         try {
-            $user = auth('api')->user();
+            $user = getAuthAPIUser();
             return successResponse(new GetUsersResource($user));
         } catch (\Exception $e) {
             return failureResponse($e->getMessage());
@@ -59,18 +59,18 @@ class UserRepository implements UserRepositoryInterface
             $requested_data['image'] = $image;
             $user = User::create($requested_data);
             $token = JWTAuth::fromUser($user);
-            return successResponse(['token' => $token, 'user' => new GetUsersResource(\auth('api')->user())]);
+            return successResponse(['token' => $token, 'user' => new GetUsersResource($user)]);
         } catch (\Exception $e) {
             return failureResponse($e->getMessage());
         }
 
-    }// create user end
+    }//end of create user
 
     // update user start
     public function updateUser($request)
     {
         try {
-            $auth_user = auth('api')->user();
+            $auth_user = getAuthAPIUser();
 
             $user = User::find($request->user_id);
 
@@ -81,7 +81,7 @@ class UserRepository implements UserRepositoryInterface
                 'id' => $request->user_id
             ]);
 
-            $requested_data = $request->except(['user_id','image']);
+            $requested_data = $request->except(['user_id', 'image']);
 
             if ($request->has('image')) {
                 $image_path = public_path('uploads/');
@@ -101,5 +101,21 @@ class UserRepository implements UserRepositoryInterface
             return failureResponse($e->getMessage());
         }
     }//end of update user
+
+    // delete user start
+    public function deleteUser($request){
+        try {
+            $auth_user = getAuthAPIUser();
+            if ($auth_user->is_admin == 0)
+                return failureResponse("You don't have Admin access to edit users");
+            $user = User::find($request->user_id);
+            $user->delete();
+            Storage::delete($user->getRawOriginal('image'));
+            return successResponse('Deleted Successfully');
+        }catch (\Exception $e){
+            return failureResponse($e->getMessage());
+        }
+
+    }//enf od delete user
 
 }

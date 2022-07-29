@@ -18,13 +18,6 @@ Route::group(['namespace' => 'API'], function () {
 
     // login route
     Route::post('login', 'AuthController@login');
-
-    // get all users
-    Route::get('users', 'UserController@index');
-
-    // show user
-    Route::get('show-user', 'UserController@show');
-
 });
 
 // authenticated routes
@@ -32,6 +25,12 @@ Route::group(['middleware' => ['jwt.verify:api'], 'namespace' => 'API'], functio
 
     // logout route
     Route::post('logout', 'AuthController@logout');
+
+    // get all users
+    Route::get('users', 'UserController@index');
+
+    // show user
+    Route::get('show-user', 'UserController@show');
 
     // show profile
     Route::get('profile', 'UserController@profile');
@@ -41,4 +40,7 @@ Route::group(['middleware' => ['jwt.verify:api'], 'namespace' => 'API'], functio
 
     //edit user
     Route::post('edit-user', 'UserController@update');
+
+    //delete user
+    Route::post('delete-user', 'UserController@delete');
 });
