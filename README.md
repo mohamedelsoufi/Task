@@ -13,3 +13,6 @@ Setup :
 
 Additional notes :
     - when you run the project migration , seed the database to test exists data and requirements
+    - to login with admin permission use:
+       email: mohamed@app.com
+       password:123456
