@@ -9,6 +9,7 @@ Prerequisites :
 Setup : 
     - Clone project from github https://github.com/mohamedelsoufi/Task
     - If your OS Windows , you should setup wsl, Docker desktop
+    - Run sail composer install
 
 Additional notes :
     - when you run the project migration , seed the database to test exists data and requirements
