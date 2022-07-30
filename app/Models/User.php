@@ -12,7 +12,7 @@ class User extends Authenticatable implements JWTSubject
     use HasFactory, Notifiable;
     protected $guarded = [];
 
-    protected $hidden = ['password', 'remember_token',];
+    protected $hidden = ['password', 'remember_token'];
 
     protected $casts = ['email_verified_at' => 'datetime',];
 
@@ -29,7 +29,19 @@ class User extends Authenticatable implements JWTSubject
 
     // JWT auth end
 
-    // accessors & Mutators statr
+    //relations start
+    public function reviews(){
+        return $this->hasMany(Review::class,'user_id');
+    }
+
+    public function assignments(){
+        return $this->belongsToMany(Review::class,'user_reviews');
+    }
+
+
+    //relations end
+
+    // accessors & Mutator start
     public function setPasswordAttribute($val){
         $this->attributes['password'] = bcrypt($val);
     }
@@ -42,15 +54,32 @@ class User extends Authenticatable implements JWTSubject
     {
         return asset('uploads') . '/' . $val;
     }
-    // accessors & Mutators end
+    // accessors & Mutator end
 
     //scopes start
     public function scopeAdmin($query){
         return $query->where('is_admin',1);
     }
 
+    public function scopeEmployee($query){
+        return $query->where('is_admin',0);
+    }
+
     public function scopeEmployees($query){
         return $query->where('is_admin',0);
+    }
+
+    public function scopeSearch($query)
+    {
+        $query->where(function ($q) {
+            if (request()->filled('is_admin')) {
+                $q->where('is_admin', request()->is_admin);
+            }
+        })->when(request()->name, function ($q) {
+            $q->where('name', 'like', '%' . request()->name . '%');
+        })->when(request()->email, function ($q) {
+            $q->where('email', 'like', '%' . request()->email . '%');
+        });
     }
     //scopes end
 }

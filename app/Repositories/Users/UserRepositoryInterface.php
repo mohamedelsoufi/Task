@@ -15,4 +15,6 @@ interface UserRepositoryInterface
     public function updateUser($request);
 
     public function deleteUser($request);
+
+    public function myAssignments();
 }

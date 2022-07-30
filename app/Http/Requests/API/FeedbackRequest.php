@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
 
-class UpdateUserRequest extends FormRequest
+class FeedbackRequest extends FormRequest
 {
     public function authorize()
     {
@@ -16,12 +16,8 @@ class UpdateUserRequest extends FormRequest
     public function rules()
     {
         return [
-            'user_id'=>'required|exists:users,id',
-            'name' => 'required|string|max:100',
-            'email' => 'nullable|string|email|max:255|unique:users',
-            'password' => 'string|min:6',
-            'image' => 'image|max:10000',
-            'is_admin'=> 'required|boolean'
+            'review_id' => 'required',
+            'feedback' => 'required',
         ];
     }
 

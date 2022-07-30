@@ -51,4 +51,8 @@ class UserController extends Controller
     {
         return $this->userRepository->deleteUser($request);
     }
+
+    public function myAssignments(){
+        return $this->userRepository->myAssignments();
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Repositories\Users;
 
 
 use App\Http\Resources\Users\GetUsersResource;
+use App\Http\Resources\Users\MyAssignmentsResource;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -16,7 +17,7 @@ class UserRepository implements UserRepositoryInterface
     public function getAllUsers()
     {
         try {
-            $users = User::latest('id')->paginate(PAGINATION_COUNT);
+            $users = User::latest('id')->search()->paginate(PAGINATION_COUNT);
 
             return successResponse(GetUsersResource::collection($users)->response()->getData(true));
         } catch (\Exception $e) {
@@ -51,12 +52,13 @@ class UserRepository implements UserRepositoryInterface
     {
         try {
             $requested_data = $request->except(['image']);
-
+            $default_image = 'default.png';
             if ($request->has('image')) {
                 $image = $request->image->store('profile_images');
                 $requested_data['image'] = $image;
+            }else{
+                $requested_data['image'] = $default_image;
             }
-            $requested_data['image'] = $image;
             $user = User::create($requested_data);
             $token = JWTAuth::fromUser($user);
             return successResponse(['token' => $token, 'user' => new GetUsersResource($user)]);
@@ -107,7 +109,7 @@ class UserRepository implements UserRepositoryInterface
         try {
             $auth_user = getAuthAPIUser();
             if ($auth_user->is_admin == 0)
-                return failureResponse("You don't have Admin access to edit users");
+                return failureResponse("You don't have Admin access to delete users");
             $user = User::find($request->user_id);
             $user->delete();
             Storage::delete($user->getRawOriginal('image'));
@@ -117,5 +119,17 @@ class UserRepository implements UserRepositoryInterface
         }
 
     }//enf od delete user
+
+    // get auth user assignments start
+    public function myAssignments()
+    {
+        try {
+            $user = getAuthAPIUser();
+           $data = $user->assignments()->latest()->paginate(PAGINATION_COUNT);
+            return successResponse(MyAssignmentsResource::collection($data)->response()->getData(true));
+        }catch (\Exception $e){
+            return failureResponse($e->getMessage());
+        }
+    }// end of get auth user assignments
 
 }
